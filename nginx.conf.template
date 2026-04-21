@@ -1,0 +1,33 @@
+server {
+    listen       ${PORT};
+    listen       [::]:${PORT};
+    server_name  _;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # Gzip common assets
+    gzip on;
+    gzip_types text/plain text/css text/javascript application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    # Long cache for versioned assets
+    location /assets/ {
+        try_files $uri =404;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
+    # Pretty URLs: try file, then file.html, then 404
+    location / {
+        try_files $uri $uri.html $uri/ =404;
+    }
+
+    # Language-based redirect from / to /en/ only if browser explicitly prefers EN
+    # (kept simple — DE is the default at root; users flip via the DE/EN toggle)
+
+    error_page  500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}
